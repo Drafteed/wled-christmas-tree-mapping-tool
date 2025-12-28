@@ -362,51 +362,53 @@
                             <hr/>
 
                             <table className="table">
-                                {rows.map((row, i) => (
-                                    <tr key={i}>
-                                        <td>
-                                            Line {i}
-                                        </td>
-                                        <td>
-                                            Left LED: <input
-                                            type="number"
-                                            min="0"
-                                            max={count - 1}
-                                            value={row.left}
-                                            onChange={e => {
-                                                const r = [...rows];
-                                                r[i].left = e.target.value;
-                                                setRows(r);
-                                            }}
-                                        />
-                                        </td>
-                                        <td>
-                                            Right LED: <input
-                                            type="number"
-                                            min="0"
-                                            max={count - 1}
-                                            value={row.right}
-                                            onChange={e => {
-                                                const r = [...rows];
-                                                r[i].right = e.target.value;
-                                                setRows(r);
-                                            }}
-                                        /></td>
-                                        <td>
-                                            Offset: <input
-                                            type="number"
-                                            min={-width}
-                                            max={width}
-                                            value={row.offset}
-                                            onChange={e => {
-                                                const r = [...rows];
-                                                r[i].offset = e.target.value;
-                                                setRows(r);
-                                            }}
-                                        />
-                                        </td>
-                                    </tr>
-                                )).reverse()}
+                                <tbody>
+                                    {rows.map((row, i) => (
+                                        <tr key={i}>
+                                            <td>
+                                                Line {i}
+                                            </td>
+                                            <td>
+                                                Left LED: <input
+                                                type="number"
+                                                min="0"
+                                                max={count - 1}
+                                                value={row.left}
+                                                onChange={e => {
+                                                    const r = [...rows];
+                                                    r[i].left = e.target.value;
+                                                    setRows(r);
+                                                }}
+                                            />
+                                            </td>
+                                            <td>
+                                                Right LED: <input
+                                                type="number"
+                                                min="0"
+                                                max={count - 1}
+                                                value={row.right}
+                                                onChange={e => {
+                                                    const r = [...rows];
+                                                    r[i].right = e.target.value;
+                                                    setRows(r);
+                                                }}
+                                            /></td>
+                                            <td>
+                                                Offset: <input
+                                                type="number"
+                                                min={-width}
+                                                max={width}
+                                                value={row.offset}
+                                                onChange={e => {
+                                                    const r = [...rows];
+                                                    r[i].offset = e.target.value;
+                                                    setRows(r);
+                                                }}
+                                            />
+                                            </td>
+                                        </tr>
+                                    )).reverse()}
+                                </tbody>
                             </table>
                             <div className="submit">
                                 <button onClick={generateMapping}>Get mapping</button>
@@ -438,7 +440,7 @@
                                     each other.
                                 </p>
                             </div>
-                            <textarea value={mapping}/>
+                            <textarea value={mapping} readOnly/>
                         </section>
                     )
                 }

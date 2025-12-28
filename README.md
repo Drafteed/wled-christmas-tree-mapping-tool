@@ -1,7 +1,7 @@
 # WLED Christmas Tree Lights Mapping Tool
 
-Simple and easy-to-use tool for creating WLED mappings for Christmas tree lights. 
-It guides you through a few simple steps to generate a 2D mapping for addressable LEDs, 
+Simple and easy-to-use tool for creating [WLED](https://kno.wled.ge/) mappings for Christmas tree lights. 
+It guides you through a few simple steps to generate a 2D matrix mapping for addressable LEDs, 
 allowing you to unlock stunning 2D effects and animations on your Christmas tree.
 
 <picture>
@@ -26,8 +26,11 @@ present in the WLED `File Editor`.
 
 ## Create mapping
 
-Just download [WLED_CHRISTMAS_TREE_MAPPING_TOOL.html](WLED_CHRISTMAS_TREE_MAPPING_TOOL.html), 
-open it in your browser locally, and follow the guided steps.
+Just download [WLED_CHRISTMAS_TREE_MAPPING_TOOL.html](WLED_CHRISTMAS_TREE_MAPPING_TOOL.html).
+
+Open it in your browser locally, and follow the guided steps.
+
+<a href="/images/ui.png"><img src="/images/ui.png" width="700" alt="WLED Christmas Tree Lights Mapping Tool UI"></a>
 
 ## License
 
