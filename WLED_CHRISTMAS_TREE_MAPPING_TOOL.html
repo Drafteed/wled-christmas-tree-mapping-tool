@@ -267,6 +267,27 @@
       });
     }
 
+    async function testWLED() {
+      try {
+        await fetch(`http://${ip}/json/state`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            on: true,
+            bri: 255,
+            ledmap: 0,
+            seg: {
+              fx: 180,
+              pal: 48,
+              frz: false,
+            },
+          }),
+        });
+      } catch {
+
+      }
+    }
+
     function generateEditor() {
       setRows(
         Array.from({length: height}, () => ({
@@ -466,7 +487,7 @@
                 </tbody>
               </table>
               <div className="submit">
-                <button onClick={generateMapping}>Get mapping</button>
+                <button onClick={generateMapping}>Generate mapping</button>
               </div>
             </section>
           )
@@ -493,6 +514,7 @@
                 <button onClick={exportMapping}>Upload mapping to WLED</button>
                 <button onClick={configure2DMatrix}>Configure 2D matrix in WLED</button>
                 <button onClick={reboot}>Reboot WLED</button>
+                <button onClick={testWLED}>Test run</button>
               </div>
               <div className="text">
                 <p>
