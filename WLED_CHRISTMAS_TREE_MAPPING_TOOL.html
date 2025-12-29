@@ -201,10 +201,11 @@
           setHeight(data.height);
           const rows = Array.from({length: data.height}, (_, i) => {
             const row = data.map.slice(i * data.width, i * data.width + data.width);
+            const offset = Math.round(((row.findIndex(v => v !== -1) + row.findLastIndex(v => v !== -1)) / 2) - (row.length - 1) / 2);
             return {
               left: row.find(v => v !== -1),
               right: row.findLast(v => v !== -1),
-              offset: 0,
+              offset: offset,
             };
           });
           setRows(rows.reverse());
@@ -260,6 +261,26 @@
           ledmap: 9, // to avoid affect current ledmap
           seg: {
             i: [0, count, '000000', start, end ? end + 1 : start, 'FFFFFF'],
+            rev: false,
+            mi: false,
+          },
+        }),
+      });
+    }
+
+    async function highlightCenterLEDs() {
+      const centerLeds = rows.reduce((a, v) => {
+        return [...a, Math.round((v.left + v.right) / 2) + v.offset];
+      }, []);
+      await fetch(`http://${ip}/json/state`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          on: true,
+          bri: 255,
+          ledmap: 9, // to avoid affect current ledmap
+          seg: {
+            i: [0, count, '000000', ...centerLeds.flatMap(x => [x, 'FFFFFF'])],
             rev: false,
             mi: false,
           },
@@ -406,7 +427,8 @@
               <div className="text">
                 <p>
                   ✅ Now find the number of the leftmost and rightmost LED in each horizontal line.<br/>
-                  ⚠️ For initial setup, leave the offsets at 0.<br/>
+                  ⚠️ For the initial setup, you can leave the offsets set to 0.<br/>
+                  ℹ️ After defining all lines, you can highlight the center of each row and fine-tune the offsets.<br/>
                   🔎 Use the slider below to find the number of each LED.
                 </p>
               </div>
@@ -488,6 +510,7 @@
               </table>
               <div className="submit">
                 <button onClick={generateMapping}>Generate mapping</button>
+                <button onClick={highlightCenterLEDs}>Highlight center of LEDs</button>
               </div>
             </section>
           )
@@ -503,10 +526,6 @@
                 <p>
                   🎉 Your mapping is done!<br/>
                   Upload mapping to WLED, configure 2D matrix and reboot device.
-                </p>
-                <p>
-                  ℹ️ You can use the offsets to tweak the horizontal alignment of the rows relative to
-                  each other.
                 </p>
               </div>
               <textarea value={mapping} readOnly/>
