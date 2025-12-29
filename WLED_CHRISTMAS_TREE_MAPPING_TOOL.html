@@ -196,13 +196,11 @@
       try {
         const res = await fetch(`http://${ip}/edit?edit=%2Fledmap.json`);
         const data = await res.json();
-        if (data?.width) setWidth(data.width);
-        if (data?.height) setHeight(data.height);
-        if (data?.map) {
-          const map = data?.map;
-          // todo: check map dimensions
+        if (data.width && data.height && data.height) {
+          setWidth(data.width);
+          setHeight(data.height);
           const rows = Array.from({length: data.height}, (_, i) => {
-            const row = map.slice(i * data.width, i * data.width + data.width);
+            const row = data.map.slice(i * data.width, i * data.width + data.width);
             return {
               left: row.find(v => v !== -1),
               right: row.findLast(v => v !== -1),
@@ -236,7 +234,7 @@
           method: 'POST',
           body: `SOMP=1&PW=8&PH=8&MPH=1&MPV=1&PB=0&PR=0&PV=0&MPC=1&P0B=0&P0R=0&P0V=0&P0W=${width}&P0H=${height}&P0X=0&P0Y=0&data=`,
         });
-        alert('2D matrix successfully configured!')
+        alert('2D matrix successfully configured!');
       } catch {
         alert('Failed configure 2D matrix in WLED');
       }
@@ -245,7 +243,7 @@
     async function reboot() {
       try {
         await fetch(`http://${ip}/reset`);
-        alert('Wait up to 20 seconds for WLED to reboot...');
+        alert('Please wait ~10 seconds...');
       } catch {
         alert('Failed reboot WLED');
       }
@@ -259,7 +257,7 @@
         body: JSON.stringify({
           on: true,
           bri: 255,
-          ledmap: false,
+          ledmap: 9, // to avoid affect current ledmap
           seg: {
             i: [0, count, '000000', start, end ? end + 1 : start, 'FFFFFF'],
             rev: false,
@@ -482,7 +480,7 @@
               </div>
               <div className="text">
                 <p>
-                  🎉 Your mapping is done!<br />
+                  🎉 Your mapping is done!<br/>
                   Upload mapping to WLED, configure 2D matrix and reboot device.
                 </p>
                 <p>
