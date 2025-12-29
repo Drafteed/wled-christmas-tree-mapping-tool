@@ -211,7 +211,8 @@
           });
           setRows(rows.reverse());
         }
-      } catch {}
+      } catch {
+      }
     }
 
     async function exportMapping() {
@@ -229,10 +230,22 @@
       }
     }
 
+    async function configure2DMatrix() {
+      try {
+        await fetch(`http://${ip}/settings/2D`, {
+          method: 'POST',
+          body: `SOMP=1&PW=8&PH=8&MPH=1&MPV=1&PB=0&PR=0&PV=0&MPC=1&P0B=0&P0R=0&P0V=0&P0W=${width}&P0H=${height}&P0X=0&P0Y=0&data=`,
+        });
+        alert('2D matrix successfully configured!')
+      } catch {
+        alert('Failed configure 2D matrix in WLED');
+      }
+    }
+
     async function reboot() {
       try {
         await fetch(`http://${ip}/reset`);
-        alert('Wait up to 30 seconds for WLED to reboot...');
+        alert('Wait up to 20 seconds for WLED to reboot...');
       } catch {
         alert('Failed reboot WLED');
       }
@@ -474,15 +487,8 @@
               </div>
               <div className="text">
                 <p>
-                  🎉 Your mapping is done!
-                </p>
-                <p>
-                  Upload it to WLED via the <a href={`http://${ip}/edit`} target="_blank">File
-                  Editor</a> into <b>/ledmap.json</b> (create the file if it does not exist).<br/> Then
-                  put <a href={`http://${ip}/settings/2D`} target="_blank">WLED into 2D
-                  mode</a> in <b>Setup &gt; 2D Configuration &gt; 2D Matrix &gt; Panel Dimensions</b> and
-                  enter your matrix dimensions (<b>{width}x{height}</b>).<br/>
-                  Save and <a href={`http://${ip}/reset`} target="_blank">fully reboot WLED</a>.
+                  🎉 Your mapping is done!<br />
+                  Upload mapping to WLED, configure 2D matrix in WLED and reboot device.
                 </p>
                 <p>
                   ℹ️ You can use the offsets to tweak the horizontal alignment of the rows relative to
@@ -492,7 +498,19 @@
               <textarea value={mapping} readOnly/>
               <div className="submit">
                 <button onClick={exportMapping}>Upload mapping to WLED</button>
+                <button onClick={configure2DMatrix}>Configure 2D matrix in WLED</button>
                 <button onClick={reboot}>Reboot WLED</button>
+              </div>
+              <div className="text">
+                <p>
+                  <b>Manual configuration</b>:<br/>
+                  Upload mapping to WLED via the <a href={`http://${ip}/edit`} target="_blank">File
+                  Editor</a> into <b>/ledmap.json</b> (create the file if it does not exist).<br/> Then
+                  setup <a href={`http://${ip}/settings/2D`} target="_blank">WLED into 2D
+                  mode</a> in <b>Setup &gt; 2D Configuration &gt; 2D Matrix &gt; Panel Dimensions</b> and
+                  enter your matrix dimensions (<b>{width}x{height}</b>).<br/>
+                  Save and <a href={`http://${ip}/reset`} target="_blank">fully reboot WLED</a>.
+                </p>
               </div>
             </section>
           )
