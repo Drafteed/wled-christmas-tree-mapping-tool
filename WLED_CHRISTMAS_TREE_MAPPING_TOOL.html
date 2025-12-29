@@ -259,6 +259,7 @@
         body: JSON.stringify({
           on: true,
           bri: 255,
+          ledmap: false,
           seg: {
             i: [0, count, '000000', start, end ? end + 1 : start, 'FFFFFF'],
             rev: false,
@@ -404,12 +405,6 @@
                   onChange={e => highlightLED(parseInt(e.target.value))}
                   style={{width: '100%'}}
                 />
-              </div>
-              <div className="notice">ℹ️ Note: If the slider is not working correctly, delete
-                the <b>/ledmap.json</b> file
-                from the <a href={`http://${ip}/edit`} target="_blank">File Editor</a>,
-                put <a href={`http://${ip}/settings/2D`} target="_blank">WLED into 1D mode</a>,
-                and <a href={`http://${ip}/reset`} target="_blank">fully reboot WLED</a>.
               </div>
               <hr/>
 
