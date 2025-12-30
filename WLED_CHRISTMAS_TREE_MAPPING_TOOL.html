@@ -272,7 +272,7 @@
 
     async function highlightCenterLEDs() {
       const centerLeds = rows.reduce((a, v) => {
-        return [...a, Math.round((parseInt(v.left) + parseInt(v.right)) / 2) - parseInt(v.offset)];
+        return [...a, Math.round((parseInt(v.left) + parseInt(v.right)) / 2) + parseInt(v.offset)];
       }, []);
       console.log(centerLeds);
       await fetch(`http://${ip}/json/state`, {
