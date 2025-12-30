@@ -170,7 +170,8 @@
     const [connected, setConnected] = useState(false);
     const [error, setError] = useState(false);
     const [count, setCount] = useState(0);
-    const [selectedLed, setSelectedLed] = useState('X');
+    const [selectedLed, setSelectedLed] = useState(0);
+    const [selectedLedEnd, setSelectedLedEnd] = useState('');
 
     const [width, setWidth] = useState('');
     const [height, setHeight] = useState('');
@@ -251,7 +252,8 @@
     }
 
     async function highlightLED(start, end) {
-      setSelectedLed(end !== undefined ? `${start} - ${end}` : start);
+      setSelectedLed(start);
+      setSelectedLedEnd(end);
       await fetch(`http://${ip}/json/state`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -437,7 +439,7 @@
               <hr/>
               <div className="group">
                 <div className="group">
-                  Highlighted LED Number: {selectedLed}
+                  Highlighted LED Number: {selectedLed}{selectedLedEnd && ` - ${selectedLedEnd}`}
                 </div>
                 <input
                   type="range"
