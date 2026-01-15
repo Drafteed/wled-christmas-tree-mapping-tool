@@ -136,7 +136,7 @@
 <div id="root"></div>
 
 <script type="text/babel">
-  const {useState} = React;
+  const {useRef, useState} = React;
 
   function generateMatrix(width, height, ranges) {
     const matrix = Array.from({length: height}, () =>
@@ -166,6 +166,8 @@
   }
 
   function App() {
+    const connection = useRef(null);
+
     const [ip, setIp] = useState('wled-37fdb1');
     const [connected, setConnected] = useState(false);
     const [error, setError] = useState(false);
@@ -180,13 +182,25 @@
 
     async function connect() {
       try {
-        const res = await fetch(`http://${ip}/json/info`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setCount(data.leds.count);
-        setConnected(true);
-        setError(false);
-        await importMapping();
+        const socket = new WebSocket(`ws://${ip}/ws`);
+        socket.addEventListener('open', () => {
+          console.log('connected');
+        });
+        socket.addEventListener('message', (event) => {
+          console.log('Message from server:', event.data);
+          const data = JSON.parse(event.data);
+          setCount(data?.info?.leds?.count);
+          setConnected(true);
+          setError(false);
+        });
+
+        connection.current = socket;
+
+        //const res = await fetch(`http://${ip}/json/info`);
+        //if (!res.ok) throw new Error();
+        //const data = await res.json();
+
+        //await importMapping();
       } catch {
         setError(true);
         setConnected(false);
@@ -254,34 +268,29 @@
     async function highlightLED(start, end) {
       setSelectedLed(start);
       setSelectedLedEnd(end);
-      await fetch(`http://${ip}/json/state`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          on: true,
-          bri: 255,
-          ledmap: 9, // to avoid affect current ledmap
-          seg: {
-            i: [0, count, '000000', start, end ? end + 1 : start, 'FFFFFF'],
-            rev: false,
-            mi: false,
-          },
-        }),
-      });
+      connection.current.send(JSON.stringify({
+        on: true,
+        bri: 255,
+        ledmap: 9, // to avoid affect current ledmap
+        seg: {
+          i: [0, count, '000000', start, end ? end + 1 : start, 'FFFFFF'],
+          rev: false,
+          mi: false,
+        },
+      }));
     }
 
     async function highlightCenterLEDs() {
       const centerLeds = rows.reduce((a, v) => {
         return [...a, Math.round((parseInt(v.left) + parseInt(v.right)) / 2) + parseInt(v.offset)];
       }, []);
-      console.log(centerLeds);
       await fetch(`http://${ip}/json/state`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           on: true,
           bri: 255,
-          ledmap: 9, // to avoid affect current ledmap
+          ledmap: 10, // to avoid affect current ledmap
           seg: {
             i: [0, count, '000000', ...centerLeds.flatMap(x => [x, 'FFFFFF'])],
             rev: false,
