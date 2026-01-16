@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0">
   <title>WLED Christmas Tree Configurator</title>
   <style>
     body {
@@ -18,9 +19,17 @@
       color: inherit;
     }
 
-    table {
-      border-collapse: separate;
-      border-spacing: 20px 5px;
+    .generator {
+      overflow: auto;
+    }
+
+    table td {
+      padding: 5px;
+      white-space: nowrap;
+
+      @media (min-width: 768px) {
+        padding: 5px 10px;
+      }
     }
 
     section {
@@ -47,10 +56,13 @@
 
     .grid {
       display: grid;
-      grid-auto-flow: column;
-      justify-content: start;
-      align-items: center;
-      gap: 20px;
+      gap: 10px;
+
+      @media (min-width: 768px) {
+        justify-content: start;
+        grid-auto-flow: column;
+        align-items: center;
+      }
     }
 
     .tree {
@@ -67,15 +79,22 @@
       margin: 0;
     }
 
-    .submit {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
+    .text {
+      max-width: 800px;
+    }
+
+    hr {
+      height: 1px;
+      margin: 15px 0;
+
+      border: none;
+      background: #252525;
     }
 
     input[type=text],
     input[type=number],
     textarea {
+      width: 100%;
       height: 28px;
 
       border: 0;
@@ -91,8 +110,9 @@
     }
 
     button {
+      width: 100%;
       height: 28px;
-      padding: 0 30px;
+      padding: 0 20px;
 
       cursor: pointer;
       color: #fff;
@@ -101,6 +121,7 @@
       background: #772AB9;
 
       font-size: 16px;
+      white-space: nowrap;
 
       transition: background 0.2s;
     }
@@ -111,20 +132,12 @@
     }
 
     button:disabled {
-      opacity: 0.7;
+      background: #a06bcd;
       pointer-events: none;
     }
 
-    hr {
-      height: 1px;
-      margin: 15px 0;
-
-      border: none;
-      background: #252525;
-    }
-
-    .text {
-      max-width: 800px;
+    .submit {
+      margin-top: 20px;
     }
   </style>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -133,16 +146,17 @@
 </head>
 <body>
 <div id="root"></div>
-
 <script type="text/babel">
-  const {useRef, useState} = React;
+  const {useRef, useState, useEffect} = React;
 
   function App() {
     const connection = useRef(null);
     const connectionTimer = useRef(null);
+    const mappingSection = useRef(null);
 
     const [ip, setIp] = useState('wled-37fdb1.local');
     const [started, setStarted] = useState(false);
+    const [connecting, setConnecting] = useState(false);
     const [connected, setConnected] = useState(false);
     const [error, setError] = useState(false);
     const [imported, setImported] = useState(false);
@@ -156,14 +170,18 @@
     const [mapping, setMapping] = useState('');
 
     async function start() {
+      setConnecting(true);
       await importMapping();
       await connect();
     }
 
     async function connect() {
+      setConnecting(true);
+
       connection.current = new WebSocket(`ws://${ip}/ws`);
 
       connection.current.addEventListener('open', () => {
+        setConnecting(false);
         setConnected(true);
         setError(false);
       });
@@ -177,6 +195,7 @@
       connection.current.addEventListener('error', () => {
         connection.current.close();
         setError(true);
+        setConnecting(false);
         setConnected(false);
       });
 
@@ -349,14 +368,18 @@
       setHeight(matrix.height);
     }
 
+    useEffect(() => {
+      if (mapping && mappingSection.current) mappingSection.current.scrollIntoView({behavior: 'smooth'});
+    }, [mapping]);
+
     return (
       <>
         <section>
           <div className="header">
             <h3>Preparations</h3>
           </div>
-          <div className="grid">
-            <div className="grid__col">
+          <div className="grid" style={{gap: '20px'}}>
+            <div className="col">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 70 90" className="tree">
                 <path fill="#6bb42e" d="M27.22 90V75.17H0l19.44-24.73H7.78l19.44-24.72H15.56L35 1l19.44 24.72H42.78l19.44 24.72H50.56L70 75.17H42.78V90z"/>
                 <mask id="a" width="70" height="89" x="0" y="1" maskUnits="userSpaceOnUse" style={{maskType: 'alpha'}}>
@@ -372,7 +395,7 @@
                 </g>
               </svg>
             </div>
-            <div className="grid__col">
+            <div className="col">
               <div className="text">
                 <p>Wrap your addressable LED strip around the tree from bottom to top so that you get even
                   horizontal rows. Configure the required number of LEDs in WLED in the regular 1D
@@ -383,9 +406,19 @@
             </div>
           </div>
         </section>
+
         <section>
-          WLED IP: <input type="text" value={ip} onChange={e => setIp(e.target.value)}/>
-          <button onClick={start}>Connect</button>
+          <div className="grid">
+            <div className="col">
+              WLED IP:
+            </div>
+            <div className="col">
+              <input type="text" value={ip} onChange={e => setIp(e.target.value)}/>
+            </div>
+            <div className="col">
+              <button onClick={start} disabled={connecting}>{connecting ? 'Connecting...' : 'Connect'}</button>
+            </div>
+          </div>
         </section>
 
         {
@@ -418,9 +451,9 @@
                 </p>
                 <p>
                   🔎 The slider below will help you locate and identify the number of each LED.<br/>
-                  ✅ You can verify that the row is filled correctly by clicking the <b>Highlight row</b> button.<br/>
+                  ✅ You can verify that the row is filled correctly by clicking the <b>Highlight</b> button.<br/>
                   ⚠️ For the initial setup, you can leave the offsets at 0.<br/>
-                  ℹ️ After defining all lines, you can highlight the center of each row and fine-tune the offsets.
+                  ℹ️ Once the rows are set, you can highlight the center LED in each row to adjust the offsets.
                 </p>
               </div>
 
@@ -447,88 +480,113 @@
                 />
               </div>
               <hr/>
+              <div className="generator">
+                <table className="table">
+                  <thead>
+                  <tr>
+                    <td></td>
+                    <td>Left LED</td>
+                    <td>Right LED</td>
+                    <td>Offset</td>
+                    <td></td>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {rows
+                    .map((row, i) => (
+                      <tr key={i}>
+                        <td>Row {i + 1}</td>
+                        <td>
+                          <input
+                            type="number"
+                            min="0"
+                            max={count - 1}
+                            value={row.left}
+                            onChange={(e) => {
+                              const r = [...rows];
+                              r[i].left = parseInt(e.target.value);
+                              setRows(r);
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            min="0"
+                            max={count - 1}
+                            value={row.right}
+                            onChange={(e) => {
+                              const r = [...rows];
+                              r[i].right = parseInt(e.target.value);
+                              setRows(r);
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            min={-count - 1}
+                            max={count - 1}
+                            value={row.offset}
+                            onChange={(e) => {
+                              const r = [...rows];
+                              r[i].offset = parseInt(e.target.value);
+                              setRows(r);
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <div className="grid" style={{display: 'flex'}}>
+                            <div className="col">
+                              <button
+                                disabled={!connected}
+                                onClick={() => {
+                                  const r = [...rows];
+                                  const left = parseInt(r[i].left);
+                                  const right = parseInt(r[i].right);
 
-              <table className="table">
-                <tbody>
-                {rows
-                  .map((row, i) => (
-                    <tr key={i}>
-                      <td>Row {i + 1}</td>
-                      <td>
-                        Left LED:{' '}
-                        <input
-                          type="number"
-                          min="0"
-                          max={count - 1}
-                          value={row.left}
-                          onChange={(e) => {
-                            const r = [...rows];
-                            r[i].left = parseInt(e.target.value);
-                            setRows(r);
-                          }}
-                        />
-                      </td>
-                      <td>
-                        Right LED:{' '}
-                        <input
-                          type="number"
-                          min="0"
-                          max={count - 1}
-                          value={row.right}
-                          onChange={(e) => {
-                            const r = [...rows];
-                            r[i].right = parseInt(e.target.value);
-                            setRows(r);
-                          }}
-                        />
-                      </td>
-                      <td>
-                        Offset:{' '}
-                        <input
-                          type="number"
-                          min={-count - 1}
-                          max={count - 1}
-                          value={row.offset}
-                          onChange={(e) => {
-                            const r = [...rows];
-                            r[i].offset = parseInt(e.target.value);
-                            setRows(r);
-                          }}
-                        />
-                      </td>
-                      <td>
-                        <button
-                          disabled={!connected}
-                          onClick={() => {
-                            const r = [...rows];
-                            const left = parseInt(r[i].left);
-                            const right = parseInt(r[i].right);
-                            highlightLED(left < right ? left : right, right > left ? right : left);
-                          }}
-                        >
-                          Highlight row
-                        </button>
-                      </td>
-                      <td>
-                        <button
-                          onClick={() => {
-                            setRows([...rows.slice(0, i), ...rows.slice(i + 1)]);
-                          }}
-                        >
-                          Delete row
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                  .reverse()}
-                </tbody>
-              </table>
+                                  if (!left || !right) {
+                                    alert('Please fill in all the values in the row!');
+                                    return;
+                                  }
+
+                                  highlightLED(left < right ? left : right, right > left ? right : left);
+                                }}
+                              >
+                                Highlight
+                              </button>
+                            </div>
+                            <div className="col">
+                              <button
+                                onClick={() => {
+                                  setRows([...rows.slice(0, i), ...rows.slice(i + 1)]);
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                    .reverse()}
+                  </tbody>
+                </table>
+              </div>
               <div className="submit">
-                <button onClick={generateMapping}>Generate mapping</button>
-                <button onClick={() => setRows([...rows, {offset: 0}])}>Add row</button>
-                <button disabled={!connected} onClick={highlightCenterLEDs}>
-                  Highlight center of LEDs
-                </button>
+                <div className="grid">
+                  <div className="col">
+                    <button onClick={generateMapping}>Generate mapping</button>
+                  </div>
+                  <div className="col">
+                    <button onClick={() => setRows([...rows, {offset: 0}])}>Add row</button>
+                  </div>
+                  <div className="col">
+                    <button disabled={!connected} onClick={highlightCenterLEDs}>
+                      Highlight center LEDs
+                    </button>
+                  </div>
+                </div>
               </div>
             </section>
           )
@@ -536,7 +594,7 @@
 
         {
           mapping && (
-            <section>
+            <section ref={mappingSection}>
               <div className="header">
                 <h3>Magic is coming!</h3>
               </div>
@@ -548,18 +606,28 @@
               </div>
               <textarea value={mapping} readOnly/>
               <div className="submit">
-                <button disabled={!connected} onClick={exportMapping}>
-                  Upload mapping to WLED
-                </button>
-                <button disabled={!connected} onClick={configure2DMatrix}>
-                  Configure 2D matrix in WLED
-                </button>
-                <button disabled={!connected} onClick={reboot}>
-                  Reboot WLED
-                </button>
-                <button disabled={!connected} onClick={testWLED}>
-                  Test run
-                </button>
+                <div className="grid">
+                  <div className="col">
+                    <button disabled={!connected} onClick={exportMapping}>
+                      Upload mapping to WLED
+                    </button>
+                  </div>
+                  <div className="col">
+                    <button disabled={!connected} onClick={configure2DMatrix}>
+                      Configure 2D matrix in WLED
+                    </button>
+                  </div>
+                  <div className="col">
+                    <button disabled={!connected} onClick={reboot}>
+                      Reboot WLED
+                    </button>
+                  </div>
+                  <div className="col">
+                    <button disabled={!connected} onClick={testWLED}>
+                      Test run
+                    </button>
+                  </div>
+                </div>
               </div>
               <div className="text">
                 <p>
