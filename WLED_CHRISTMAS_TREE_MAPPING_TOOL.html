@@ -156,8 +156,8 @@
     const [mapping, setMapping] = useState('');
 
     async function start() {
-      await connect();
       await importMapping();
+      await connect();
     }
 
     async function connect() {
