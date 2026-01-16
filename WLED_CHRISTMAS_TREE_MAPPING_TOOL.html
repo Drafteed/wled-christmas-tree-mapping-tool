@@ -67,12 +67,6 @@
       margin: 0;
     }
 
-    .notice {
-      color: #888888;
-
-      font-size: 14px;
-    }
-
     .submit {
       display: flex;
       gap: 10px;
@@ -116,6 +110,11 @@
       background: #8D4AD3;
     }
 
+    button:disabled {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
     hr {
       height: 1px;
       margin: 15px 0;
@@ -138,73 +137,56 @@
 <script type="text/babel">
   const {useRef, useState} = React;
 
-  function generateMatrix(width, height, ranges) {
-    const matrix = Array.from({length: height}, () =>
-      Array(width).fill(-1),
-    );
-
-    for (let row = 0; row < height; row++) {
-      let [start, end, offset = 0] = ranges[row];
-      const step = start <= end ? 1 : -1;
-
-      const values = [];
-      for (let v = start; step > 0 ? v <= end : v >= end; v += step) {
-        values.push(v);
-      }
-
-      const len = values.length;
-      let startCol = Math.floor((width - len) / 2) + offset;
-      if (startCol < 0) startCol = 0;
-      if (startCol + len > width) startCol = width - len;
-
-      for (let i = 0; i < len; i++) {
-        matrix[row][startCol + i] = values[i];
-      }
-    }
-
-    return matrix;
-  }
-
   function App() {
     const connection = useRef(null);
+    const connectionTimer = useRef(null);
 
-    const [ip, setIp] = useState('wled-37fdb1');
+    const [ip, setIp] = useState('wled-37fdb1.local');
+    const [started, setStarted] = useState(false);
     const [connected, setConnected] = useState(false);
     const [error, setError] = useState(false);
+    const [imported, setImported] = useState(false);
     const [count, setCount] = useState(0);
     const [selectedLed, setSelectedLed] = useState(0);
     const [selectedLedEnd, setSelectedLedEnd] = useState('');
 
     const [width, setWidth] = useState('');
     const [height, setHeight] = useState('');
-    const [rows, setRows] = useState([]);
+    const [rows, setRows] = useState([{offset: 0}, {offset: 0}, {offset: 0}]);
     const [mapping, setMapping] = useState('');
 
+    async function start() {
+      await connect();
+      await importMapping();
+    }
+
     async function connect() {
-      try {
-        const socket = new WebSocket(`ws://${ip}/ws`);
-        socket.addEventListener('open', () => {
-          console.log('connected');
-        });
-        socket.addEventListener('message', (event) => {
-          console.log('Message from server:', event.data);
-          const data = JSON.parse(event.data);
-          setCount(data?.info?.leds?.count);
-          setConnected(true);
-          setError(false);
-        });
+      connection.current = new WebSocket(`ws://${ip}/ws`);
 
-        connection.current = socket;
+      connection.current.addEventListener('open', () => {
+        setConnected(true);
+        setError(false);
+      });
 
-        //const res = await fetch(`http://${ip}/json/info`);
-        //if (!res.ok) throw new Error();
-        //const data = await res.json();
+      connection.current.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data);
+        setCount(data?.info?.leds?.count);
+        setStarted(true);
+      });
 
-        //await importMapping();
-      } catch {
+      connection.current.addEventListener('error', () => {
+        connection.current.close();
         setError(true);
         setConnected(false);
-      }
+      });
+
+      connection.current.addEventListener('close', () => {
+        if (connectionTimer.current) return;
+        connectionTimer.current = setTimeout(async () => {
+          connectionTimer.current = null;
+          await connect();
+        }, 1000);
+      });
     }
 
     async function importMapping() {
@@ -224,8 +206,12 @@
             };
           });
           setRows(rows.reverse());
+          setImported(true);
+        } else {
+          setImported(false);
         }
       } catch {
+        setImported(false);
       }
     }
 
@@ -284,61 +270,83 @@
       const centerLeds = rows.reduce((a, v) => {
         return [...a, Math.round((parseInt(v.left) + parseInt(v.right)) / 2) + parseInt(v.offset)];
       }, []);
-      await fetch(`http://${ip}/json/state`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          on: true,
-          bri: 255,
-          ledmap: 10, // to avoid affect current ledmap
-          seg: {
-            i: [0, count, '000000', ...centerLeds.flatMap(x => [x, 'FFFFFF'])],
-            rev: false,
-            mi: false,
-          },
-        }),
-      });
+      connection.current.send(JSON.stringify({
+        on: true,
+        bri: 255,
+        ledmap: 10, // to avoid affect current ledmap
+        seg: {
+          i: [0, count, '000000', ...centerLeds.flatMap(x => [x, 'FFFFFF'])],
+          rev: false,
+          mi: false,
+        },
+      }));
     }
 
     async function testWLED() {
-      try {
-        await fetch(`http://${ip}/json/state`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            on: true,
-            bri: 255,
-            ledmap: 0,
-            seg: {
-              fx: 180,
-              pal: 48,
-              frz: false,
-            },
-          }),
-        });
-      } catch {
-
-      }
+      connection.current.send(JSON.stringify({
+        on: true,
+        bri: 255,
+        ledmap: 0,
+        seg: {
+          fx: 180,
+          pal: 48,
+          frz: false,
+        },
+      }));
     }
 
-    function generateEditor() {
-      setRows(
-        Array.from({length: height}, () => ({
-          left: '',
-          right: '',
-          offset: 0,
-        })),
+    function generateMatrix(ranges) {
+      const height = ranges.length;
+      let width = 0;
+
+      for (const [start, end, offset = 0] of ranges) {
+        const len = Math.abs(end - start) + 1;
+        const requiredWidth = len + Math.abs(offset) * 2;
+        width = Math.max(width, requiredWidth);
+      }
+
+      const map = Array.from({length: height}, () =>
+        Array(width).fill(-1),
       );
+
+      for (let row = 0; row < height; row++) {
+        let [start, end, offset = 0] = ranges[row];
+
+        const step = start <= end ? 1 : -1;
+        const values = [];
+
+        for (let v = start; step > 0 ? v <= end : v >= end; v += step) {
+          values.push(v);
+        }
+
+        const len = values.length;
+        let startCol = Math.floor((width - len) / 2) + offset;
+
+        for (let i = 0; i < len; i++) {
+          map[row][startCol + i] = values[i];
+        }
+      }
+
+      return {width, height, map};
     }
 
     function generateMapping() {
       const ranges = [...rows].map(r => [parseInt(r.left), parseInt(r.right), parseInt(r.offset)]).reverse();
-      const matrix = generateMatrix(parseInt(width), parseInt(height), ranges);
-      const json = `{"width":${width},"height":${height},"map":[\n` +
-        matrix.map(r => r.toString()).join(',\n') +
+      const isValid = ranges.every(a => a.every((n) => typeof n === 'number' && !isNaN(n)));
+
+      if (!isValid) {
+        alert('Please fill in all the values in the table!');
+        return;
+      }
+
+      const matrix = generateMatrix(ranges);
+      const json = `{"width":${matrix.width},"height":${matrix.height},"map":[\n` +
+        matrix.map.map(r => r.toString()).join(',\n') +
         '\n]}';
 
       setMapping(json);
+      setWidth(matrix.width);
+      setHeight(matrix.height);
     }
 
     return (
@@ -377,13 +385,13 @@
         </section>
         <section>
           WLED IP: <input type="text" value={ip} onChange={e => setIp(e.target.value)}/>
-          <button onClick={connect}>Connect</button>
+          <button onClick={start}>Connect</button>
         </section>
 
         {
           error && (
             <section id="section_error">
-              Error while connecting to WLED!
+              😢 Error while connecting to WLED! Reconnecting...
             </section>
           )
         }
@@ -391,69 +399,48 @@
         {
           connected && (
             <section id="section_info">
-              Connected. LED count: {count}.
+              👌 Connected. LED count: {count}.{imported && ' Mapping imported.'}
             </section>
           )
         }
 
         {
-          connected && (
+          started && (
             <section>
               <div className="header">
                 <h3>Let's generate your matrix!</h3>
               </div>
               <div className="text">
                 <p>
-                  🎄 Take a look at your beautiful tree! Count the number of LEDs in the longest horizontal
-                  row (usually
-                  the bottom one) and enter this number in the Width field. Then count the number of
-                  horizontal rows and enter
-                  that number in the Height field.
+                  🎄 Take a look at your beautiful tree! Calculate the number of rows (lines) vertically and add the
+                  corresponding number of rows. Then, for each row, find the <b>leftmost</b> and <b>rightmost</b> LED
+                  number.
                 </p>
-              </div>
-              <div className="group">
-                Width (max led's in one horizontal line):
-              </div>
-              <div className="group">
-                <input type="number" min="1" value={width} onChange={e => setWidth(e.target.value)}/>
-              </div>
-              <div className="group">
-                Height (horizontal lines count):
-              </div>
-              <div className="group">
-                <input type="number" min="1" value={height} onChange={e => setHeight(e.target.value)}/>
-              </div>
-              <div className="submit">
-                <button onClick={generateEditor}>Generate</button>
-              </div>
-            </section>
-          )
-        }
-
-        {
-          rows.length > 0 && (
-            <section>
-              <div className="header">
-                <h3>Now let's create the mapping!</h3>
-              </div>
-              <div className="text">
                 <p>
-                  ✅ Now find the number of the leftmost and rightmost LED in each horizontal line.<br/>
-                  ⚠️ For the initial setup, you can leave the offsets set to 0.<br/>
-                  ℹ️ After defining all lines, you can highlight the center of each row and fine-tune the offsets.<br/>
-                  🔎 Use the slider below to find the number of each LED.
+                  🔎 The slider below will help you locate and identify the number of each LED.<br/>
+                  ✅ You can verify that the row is filled correctly by clicking the <b>Highlight row</b> button.<br/>
+                  ⚠️ For the initial setup, you can leave the offsets at 0.<br/>
+                  ℹ️ After defining all lines, you can highlight the center of each row and fine-tune the offsets.
                 </p>
               </div>
 
               <hr/>
               <div className="group">
-                <div className="group">
-                  Highlighted LED Number: {selectedLed}{selectedLedEnd && ` - ${selectedLedEnd}`}
-                </div>
+                {connected ? (
+                  <div className="group">
+                    Highlighted LED Number: {selectedLed}{selectedLedEnd && ` - ${selectedLedEnd}`}
+                  </div>
+                ) : (
+                  <div className="group" style={{color: 'red'}}>
+                    WLED disconnected. Reconnecting...
+                  </div>
+                )}
+
                 <input
                   type="range"
                   min="0"
                   max={count - 1}
+                  disabled={!connected}
                   value={selectedLed}
                   onChange={e => highlightLED(parseInt(e.target.value))}
                   style={{width: '100%'}}
@@ -463,66 +450,85 @@
 
               <table className="table">
                 <tbody>
-                {rows.map((row, i) => (
-                  <tr key={i}>
-                    <td>
-                      Line {i}
-                    </td>
-                    <td>
-                      Left LED: <input
-                      type="number"
-                      min="0"
-                      max={count - 1}
-                      value={row.left}
-                      onChange={e => {
-                        const r = [...rows];
-                        r[i].left = e.target.value;
-                        setRows(r);
-                      }}
-                    />
-                    </td>
-                    <td>
-                      Right LED: <input
-                      type="number"
-                      min="0"
-                      max={count - 1}
-                      value={row.right}
-                      onChange={e => {
-                        const r = [...rows];
-                        r[i].right = e.target.value;
-                        setRows(r);
-                      }}
-                    /></td>
-                    <td>
-                      Offset: <input
-                      type="number"
-                      min={-width}
-                      max={width}
-                      value={row.offset}
-                      onChange={e => {
-                        const r = [...rows];
-                        r[i].offset = e.target.value;
-                        setRows(r);
-                      }}
-                    />
-                    </td>
-                    <td>
-                      <button onClick={() => {
-                        const r = [...rows];
-                        const left = parseInt(r[i].left);
-                        const right = parseInt(r[i].right);
-                        highlightLED(left < right ? left : right, right > left ? right : left);
-                      }}>
-                        Highlight row
-                      </button>
-                    </td>
-                  </tr>
-                )).reverse()}
+                {rows
+                  .map((row, i) => (
+                    <tr key={i}>
+                      <td>Row {i + 1}</td>
+                      <td>
+                        Left LED:{' '}
+                        <input
+                          type="number"
+                          min="0"
+                          max={count - 1}
+                          value={row.left}
+                          onChange={(e) => {
+                            const r = [...rows];
+                            r[i].left = parseInt(e.target.value);
+                            setRows(r);
+                          }}
+                        />
+                      </td>
+                      <td>
+                        Right LED:{' '}
+                        <input
+                          type="number"
+                          min="0"
+                          max={count - 1}
+                          value={row.right}
+                          onChange={(e) => {
+                            const r = [...rows];
+                            r[i].right = parseInt(e.target.value);
+                            setRows(r);
+                          }}
+                        />
+                      </td>
+                      <td>
+                        Offset:{' '}
+                        <input
+                          type="number"
+                          min={-count - 1}
+                          max={count - 1}
+                          value={row.offset}
+                          onChange={(e) => {
+                            const r = [...rows];
+                            r[i].offset = parseInt(e.target.value);
+                            setRows(r);
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <button
+                          disabled={!connected}
+                          onClick={() => {
+                            const r = [...rows];
+                            const left = parseInt(r[i].left);
+                            const right = parseInt(r[i].right);
+                            highlightLED(left < right ? left : right, right > left ? right : left);
+                          }}
+                        >
+                          Highlight row
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => {
+                            setRows([...rows.slice(0, i), ...rows.slice(i + 1)]);
+                          }}
+                        >
+                          Delete row
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                  .reverse()}
                 </tbody>
               </table>
               <div className="submit">
                 <button onClick={generateMapping}>Generate mapping</button>
-                <button onClick={highlightCenterLEDs}>Highlight center of LEDs</button>
+                <button onClick={() => setRows([...rows, {offset: 0}])}>Add row</button>
+                <button disabled={!connected} onClick={highlightCenterLEDs}>
+                  Highlight center of LEDs
+                </button>
               </div>
             </section>
           )
@@ -542,10 +548,18 @@
               </div>
               <textarea value={mapping} readOnly/>
               <div className="submit">
-                <button onClick={exportMapping}>Upload mapping to WLED</button>
-                <button onClick={configure2DMatrix}>Configure 2D matrix in WLED</button>
-                <button onClick={reboot}>Reboot WLED</button>
-                <button onClick={testWLED}>Test run</button>
+                <button disabled={!connected} onClick={exportMapping}>
+                  Upload mapping to WLED
+                </button>
+                <button disabled={!connected} onClick={configure2DMatrix}>
+                  Configure 2D matrix in WLED
+                </button>
+                <button disabled={!connected} onClick={reboot}>
+                  Reboot WLED
+                </button>
+                <button disabled={!connected} onClick={testWLED}>
+                  Test run
+                </button>
               </div>
               <div className="text">
                 <p>
