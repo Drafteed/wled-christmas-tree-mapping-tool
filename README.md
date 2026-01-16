@@ -1,6 +1,6 @@
 # WLED Christmas Tree Lights Mapping Tool
 
-<img src="https://img.shields.io/badge/React-%23505050.svg?logo=react" alt="React"> <a href="LICENCE"><img src="https://img.shields.io/github/license/Drafteed/wled-christmas-tree-mapping-tool?color=orange" alt="Licence"></a>
+<img src="https://img.shields.io/badge/React-%23505050.svg?logo=react" alt="React"> <a href="LICENSE"><img src="https://img.shields.io/github/license/Drafteed/wled-christmas-tree-mapping-tool?color=orange" alt="Licence"></a>
 
 Simple and easy-to-use tool for creating [WLED](https://kno.wled.ge/) mappings for Christmas tree lights. 
 It guides you through a few simple steps to generate a 2D matrix mapping for addressable LEDs, 
