@@ -545,7 +545,7 @@
                                   const left = parseInt(r[i].left);
                                   const right = parseInt(r[i].right);
 
-                                  if (!left || !right) {
+                                  if (!Number.isInteger(left) || !Number.isInteger(right)) {
                                     alert('Please fill in all the values in the row!');
                                     return;
                                   }
