@@ -11,6 +11,14 @@ allowing you to unlock stunning 2D effects and animations on your Christmas tree
 <img src="/images/wled-mapped-tree.gif" width="301" alt="WLED Mapped Tree">
 </picture>
 
+## Features
+
+- Generate a 2D mapping from your tree's LED rows, with adjustable offsets.
+- Locate individual LEDs, highlight entire rows and check their centers live on your tree.
+- Import an existing mapping from WLED to adjust it.
+- Upload the mapping, configure the 2D matrix, reboot and test effects directly from the tool.
+- Use it online or offline as a single HTML file - no installation required.
+
 ## Requirements
 
 - Addressable LED strip (WS2812B, SK6812, WS2811, etc.)

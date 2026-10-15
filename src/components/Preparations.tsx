@@ -57,10 +57,14 @@ export function Preparations() {
           <div className="my-4 max-w-3xl space-y-4">
             <p>Welcome to WLED Christmas Tree Lights Mapping Tool!</p>
             <p>
-              Wrap your addressable LED strip around the tree from bottom to top so that you get even
-              horizontal rows. Configure the required number of LEDs in WLED in the regular 1D mode. Make sure
-              everything works correctly. Also make sure that the files <b>ledmap.json</b> (
-              <b>ledmapX.json</b>) and <b>2d-gaps.json</b> are not present in the WLED File Editor.
+              Wrap your LED strip around the tree from bottom to top in even horizontal rows.
+              For a new setup, configure the LED count in WLED's 1D mode and check that the strip works.
+              Back up and remove any <b>ledmap.json</b>, <b>ledmapX.json</b> and <b>2d-gaps.json</b> files
+              from the WLED File Editor.
+            </p>
+            <p>
+              Adjusting a mapping created with this tool? Keep <b>ledmap.json</b> — it will be imported
+              when you connect. Make sure your device and WLED are on the same network.
             </p>
             <p className="opacity-50">
               <a className="underline" href="https://github.com/Drafteed/wled-christmas-tree-mapping-tool" target="_blank">

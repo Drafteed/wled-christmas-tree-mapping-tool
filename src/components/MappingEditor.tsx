@@ -49,15 +49,15 @@ export function MappingEditor({
       </div>
       <div className="my-4 max-w-3xl space-y-4">
         <p>
-          🎄 Take a look at your beautiful tree! Calculate the number of rows (lines) vertically and add the
-          corresponding number of rows. Then, for each row, find the <b>leftmost</b> and <b>rightmost</b> LED
-          number.
+          🎄 Add one row for each horizontal row on your tree, from bottom to top: <b>Row 1 is the lowest</b>.
+          For each row, enter the <b>leftmost</b> and <b>rightmost</b> LED numbers as viewed from the front.
         </p>
         <p>
-          🔎 The slider below will help you locate and identify the number of each LED.<br/>
-          ✅ You can verify that the row is filled correctly by clicking the <b>Highlight</b> button.<br/>
-          ⚠️ For the initial setup, you can leave the offsets at 0.<br/>
-          ℹ️ Once the rows are set, you can highlight the center LED in each row to adjust the offsets.
+          🔎 Use the slider to locate individual LEDs.<br/>
+          ✅ Click <b>Highlight</b> to check an entire row.<br/>
+          ⚠️ Start with <b>Offset</b> at 0.<br/>
+          ℹ️ Use <b>Highlight center LEDs</b> and adjust each row's offset
+          to align the centers vertically.
         </p>
       </div>
 

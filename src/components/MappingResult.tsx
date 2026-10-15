@@ -38,7 +38,9 @@ export function MappingResult({
         <p>
           🎉 Your mapping is done!
           <br />
-          Upload mapping to WLED, configure 2D matrix and reboot device.
+          Upload the mapping, configure the 2D matrix, then reboot WLED.
+          <br />
+          Once it reconnects, click <b>Test run</b> to try an effect.
         </p>
       </div>
       <textarea
@@ -70,7 +72,7 @@ export function MappingResult({
           </div>
         </div>
       </div>
-      <div className="my-4 max-w-3xl space-y-4">
+      <div className="my-4 max-w-5xl space-y-4 text-pretty">
         <p>
           <b>Manual configuration</b>:<br/>
           Upload mapping to WLED via the <a className="underline" href={`http://${ip}/edit`} target="_blank">File
