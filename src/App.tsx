@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Button } from './components/Button';
+import { Input } from './components/Input';
 import { Preparations } from './components/Preparations';
 import { MappingEditor } from './components/MappingEditor';
 import { MappingResult } from './components/MappingResult';
@@ -70,29 +72,37 @@ export function App() {
   return (
     <>
       <Preparations />
-      <section>
-        <div className="grid">
-          <div className="col">WLED IP:</div>
-          <div className="col">
-            <input
+      <section className="my-2.5 rounded-xl bg-purple-50 p-5 even:bg-amber-50">
+        <form
+          className="grid gap-2.5 md:flex md:flex-wrap md:items-center"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (!connecting) void start();
+          }}
+        >
+          <div>WLED IP:</div>
+          <div>
+            <Input
               type="text"
               aria-label="WLED IP"
               value={ip}
               onChange={(event) => setIp(event.target.value)}
             />
           </div>
-          <div className="col">
-            <button onClick={start} disabled={connecting}>
+          <div>
+            <Button type="submit" disabled={connecting}>
               {connecting ? 'Connecting...' : 'Connect'}
-            </button>
+            </Button>
           </div>
-        </div>
+        </form>
       </section>
       {device.error && (
-        <section id="section_error">😢 Error while connecting to WLED! Reconnecting...</section>
+        <section id="section_error" className="my-2.5 rounded-xl bg-red-500 p-5 text-white">
+          😢 Error while connecting to WLED! Reconnecting...
+        </section>
       )}
       {device.connected && (
-        <section id="section_info">
+        <section id="section_info" className="my-2.5 rounded-xl bg-purple-700 p-5 text-white">
           👌 Connected. LED count: {device.count}.{imported && ' Mapping imported.'}
         </section>
       )}

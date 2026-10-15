@@ -1,4 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react';
+import { Button } from './Button';
+import { Input } from './Input';
 import { createRow, type MappingRowValues } from '../lib/mapping';
 
 interface Props {
@@ -41,19 +43,16 @@ export function MappingEditor({
   }
 
   return (
-    <section>
-      <div className="header">
+    <section className="my-2.5 rounded-xl bg-purple-50 p-5 even:bg-amber-50">
+      <div className="my-2.5 text-xl font-bold">
         <h3>Let's generate your matrix!</h3>
       </div>
-      <div className="text">
-        {/* Preserve the original text-node boundaries for identical text layout. */}
-        {/* prettier-ignore */}
+      <div className="my-4 max-w-3xl space-y-4">
         <p>
           🎄 Take a look at your beautiful tree! Calculate the number of rows (lines) vertically and add the
           corresponding number of rows. Then, for each row, find the <b>leftmost</b> and <b>rightmost</b> LED
           number.
         </p>
-        {/* prettier-ignore */}
         <p>
           🔎 The slider below will help you locate and identify the number of each LED.<br/>
           ✅ You can verify that the row is filled correctly by clicking the <b>Highlight</b> button.<br/>
@@ -62,15 +61,15 @@ export function MappingEditor({
         </p>
       </div>
 
-      <hr />
-      <div className="group">
+      <hr className="my-4 border-gray-800" />
+      <div className="my-2.5">
         {connected ? (
-          <div className="group">
+          <div className="my-2.5">
             Highlighted LED Number: {selectedLed}
             {selectedLedEnd && ` - ${selectedLedEnd}`}
           </div>
         ) : (
-          <div className="group" style={{ color: 'red' }}>
+          <div className="my-2.5 text-red-600">
             WLED disconnected. Reconnecting...
           </div>
         )}
@@ -82,12 +81,12 @@ export function MappingEditor({
           disabled={!connected}
           value={selectedLed}
           onChange={(e) => highlightLED(parseInt(e.target.value))}
-          style={{ width: '100%' }}
+          className="w-full"
         />
       </div>
-      <hr />
-      <div className="generator">
-        <table className="table">
+      <hr className="my-4 border-gray-800" />
+      <div className="overflow-auto">
+        <table className="border-separate border-spacing-0.5 [&_td]:p-1 [&_td]:whitespace-nowrap md:[&_td]:px-2.5">
           <thead>
             <tr>
               <td></td>
@@ -104,7 +103,7 @@ export function MappingEditor({
                   <td>Row {i + 1}</td>
                   {(['left', 'right', 'offset'] as const).map((field) => (
                     <td key={field}>
-                      <input
+                      <Input
                         type="number"
                         min={field === 'offset' ? -count - 1 : 0}
                         max={count - 1}
@@ -115,18 +114,18 @@ export function MappingEditor({
                     </td>
                   ))}
                   <td>
-                    <div className="grid" style={{ display: 'flex' }}>
-                      <div className="col">
-                        <button disabled={!connected} onClick={() => highlightRow(row)}>
+                    <div className="flex items-center gap-2.5">
+                      <div>
+                        <Button disabled={!connected} onClick={() => highlightRow(row)}>
                           Highlight
-                        </button>
+                        </Button>
                       </div>
-                      <div className="col">
-                        <button
+                      <div>
+                        <Button
                           onClick={() => setRows((current) => current.filter((_, index) => index !== i))}
                         >
                           Delete
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </td>
@@ -136,18 +135,22 @@ export function MappingEditor({
           </tbody>
         </table>
       </div>
-      <div className="submit">
-        <div className="grid">
-          <div className="col">
-            <button onClick={generateMapping}>Generate mapping</button>
+      <div className="mt-5">
+        <div className="grid gap-2.5 md:flex md:flex-wrap md:items-center">
+          <div>
+            <Button onClick={generateMapping}>
+              Generate mapping
+            </Button>
           </div>
-          <div className="col">
-            <button onClick={() => setRows((current) => [...current, createRow()])}>Add row</button>
+          <div>
+            <Button onClick={() => setRows((current) => [...current, createRow()])}>
+              Add row
+            </Button>
           </div>
-          <div className="col">
-            <button disabled={!connected} onClick={highlightCenterLEDs}>
+          <div>
+            <Button disabled={!connected} onClick={highlightCenterLEDs}>
               Highlight center LEDs
-            </button>
+            </Button>
           </div>
         </div>
       </div>
