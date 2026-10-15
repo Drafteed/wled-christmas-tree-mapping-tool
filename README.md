@@ -29,10 +29,14 @@ allowing you to unlock stunning 2D effects and animations on your Christmas tree
 ## Preparations
 
 Wrap your addressable LED strip around the tree from bottom to top so that you get even
-horizontal rows. Configure the required number of LEDs in WLED in the regular 1D
-mode. Make sure everything works correctly. Also make sure that the
-files `/ledmap.json` (`/ledmapX.json`) and `/2d-gaps.json` are not
-present in the WLED `File Editor`.
+horizontal rows.
+
+For a new setup, configure the LED count in WLED's regular 1D mode and check that
+the strip works. Back up and remove any `/ledmap.json`, `/ledmapX.json` and
+`/2d-gaps.json` files from the WLED File Editor.
+
+To adjust an existing mapping created with this tool, keep `/ledmap.json` - it
+will be imported automatically when you connect.
 
 ## Create mapping
 
@@ -48,6 +52,23 @@ and open it locally. The file works without internet access or installation.
 Enter your WLED IP address or `.local` hostname and follow the guided steps.
 
 <a href="/images/ui.png"><img src="/images/ui.png" width="700" alt="WLED Christmas Tree Lights Mapping Tool UI"></a>
+
+## Mapping tips
+
+- Add rows from bottom to top: Row 1 is the lowest row on your tree.
+- Use the slider to find the leftmost and rightmost LEDs as viewed from the front.
+  Enter their numbers in Left LED and Right LED, then check with Highlight.
+- Start with Offset set to 0. Use Highlight center LEDs and adjust each row's
+  offset to align the centers vertically.
+
+## Troubleshooting
+
+- **Cannot connect?** Check that WLED opens in your browser and both devices are
+  on the same network. Try its IP address instead of a `.local` hostname.
+- **Online tool blocked?** Allow local network access in your browser. If it
+  still fails, try opening the downloaded HTML file locally.
+- **Mapping not applied?** Upload the mapping, configure the 2D matrix and fully
+  reboot WLED before testing effects.
 
 ## Contributing
 
