@@ -18,11 +18,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download build
+        uses: actions/download-artifact@v4
         with:
           name: wled-mapping-tool
           path: dist
-      - name: Attach HTML to the published release
+      - name: Upload release asset
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}

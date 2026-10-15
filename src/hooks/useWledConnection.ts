@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 
 const RECONNECT_DELAY = 1000;
 
 export function useWledConnection() {
   const socketRef = useRef<WebSocket | null>(null);
   const disposeRef = useRef<() => void>(() => {});
-  const [status, setStatus] = useState({ connecting: false, connected: false, error: false });
+  const [status, setStatus] = useState({
+    connecting: false,
+    connected: false,
+    error: false,
+  });
   const [count, setCount] = useState(0);
   const [started, setStarted] = useState(false);
 
@@ -34,14 +38,18 @@ export function useWledConnection() {
 
     function open() {
       if (disposed) return;
-      setStatus((current) => ({ ...current, connecting: true, connected: false }));
+      setStatus((current) => ({
+        ...current,
+        connecting: true,
+        connected: false,
+      }));
       try {
         const currentSocket = new WebSocket(`ws://${ip}/ws`);
         socket = currentSocket;
         socketRef.current = currentSocket;
         const isCurrent = () => !disposed && socket === currentSocket;
         currentSocket.addEventListener('open', () => {
-          if (isCurrent()) setStatus({ connecting: false, connected: true, error: false });
+          if (isCurrent()) setStatus({connecting: false, connected: true, error: false});
         });
         currentSocket.addEventListener('message', (event) => {
           if (!isCurrent()) return;
@@ -55,17 +63,21 @@ export function useWledConnection() {
         });
         currentSocket.addEventListener('error', () => {
           if (!isCurrent()) return;
-          setStatus({ connecting: false, connected: false, error: true });
+          setStatus({connecting: false, connected: false, error: true});
           currentSocket.close();
           scheduleReconnect();
         });
         currentSocket.addEventListener('close', () => {
           if (!isCurrent()) return;
-          setStatus((current) => ({ ...current, connecting: false, connected: false }));
+          setStatus((current) => ({
+            ...current,
+            connecting: false,
+            connected: false,
+          }));
           scheduleReconnect();
         });
       } catch {
-        setStatus({ connecting: false, connected: false, error: true });
+        setStatus({connecting: false, connected: false, error: true});
         scheduleReconnect();
       }
     }
@@ -77,5 +89,5 @@ export function useWledConnection() {
     if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(command));
   }, []);
 
-  return { ...status, count, started, connect, send };
+  return {...status, count, started, connect, send};
 }

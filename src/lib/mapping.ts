@@ -17,12 +17,12 @@ export interface Matrix {
 }
 
 export function createRow(): MappingRowValues {
-  return { left: '', right: '', offset: 0 };
+  return {left: '', right: '', offset: 0};
 }
 
 export function isLedMapping(value: unknown): value is LedMapping {
   if (!value || typeof value !== 'object') return false;
-  const { width, height, map } = value as LedMapping;
+  const {width, height, map} = value as LedMapping;
   return (
     Number.isInteger(width) &&
     width > 0 &&
@@ -35,7 +35,7 @@ export function isLedMapping(value: unknown): value is LedMapping {
 }
 
 export function importRows(mapping: LedMapping): MappingRowValues[] {
-  return Array.from({ length: mapping.height }, (_, i): MappingRowValues => {
+  return Array.from({length: mapping.height}, (_, i): MappingRowValues => {
     const row = mapping.map.slice(i * mapping.width, (i + 1) * mapping.width);
     const first = row.findIndex((value) => value !== -1);
     const last = row.findLastIndex((value) => value !== -1);
@@ -53,14 +53,14 @@ export function generateMatrix(ranges: [number, number, number?][]): Matrix {
   for (const [start, end, offset = 0] of ranges) {
     width = Math.max(width, Math.abs(end - start) + 1 + Math.abs(offset) * 2);
   }
-  const map = Array.from({ length: height }, () => Array<number>(width).fill(-1));
+  const map = Array.from({length: height}, () => Array<number>(width).fill(-1));
   ranges.forEach(([start, end, offset = 0], row) => {
     const step = start <= end ? 1 : -1;
     const length = Math.abs(end - start) + 1;
     const startCol = Math.floor((width - length) / 2) + offset;
     for (let i = 0; i < length; i++) map[row][startCol + i] = start + i * step;
   });
-  return { width, height, map };
+  return {width, height, map};
 }
 
 export function generateMapping(rows: MappingRowValues[]): Matrix | null {
@@ -70,10 +70,7 @@ export function generateMapping(rows: MappingRowValues[]): Matrix | null {
   // The editor stores bottom-to-top rows; WLED expects the top row first.
   return generateMatrix(
     rows
-      .map(
-        ({ left, right, offset }) =>
-          [Number(left), Number(right), Number(offset)] as [number, number, number],
-      )
+      .map(({left, right, offset}) => [Number(left), Number(right), Number(offset)] as [number, number, number])
       .reverse(),
   );
 }

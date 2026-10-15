@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
+    "check": "biome check .",
+    "fix": "biome check --write .",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },
@@ -16,6 +18,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.15",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

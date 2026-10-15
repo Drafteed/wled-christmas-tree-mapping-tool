@@ -82,6 +82,9 @@ npm run dev
 Built with React, TypeScript, Tailwind CSS and Vite. Run `npm run build` to check types and create
 the standalone `dist/WLED_CHRISTMAS_TREE_MAPPING_TOOL.html`.
 
+Run `npm run check` to check formatting and lint rules, or `npm run fix` to apply
+formatting and safe fixes with Biome.
+
 ## License
 
 [The MIT License (MIT)](LICENSE)

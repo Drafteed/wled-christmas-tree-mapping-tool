@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Button } from './components/Button';
-import { Input } from './components/Input';
-import { Preparations } from './components/Preparations';
-import { MappingEditor } from './components/MappingEditor';
-import { MappingResult } from './components/MappingResult';
-import { useWledConnection } from './hooks/useWledConnection';
-import { createRow, generateMapping, importRows, serializeMapping } from './lib/mapping';
+import {useState} from 'react';
+import {Button} from './components/Button';
+import {Input} from './components/Input';
+import {MappingEditor} from './components/MappingEditor';
+import {MappingResult} from './components/MappingResult';
+import {Preparations} from './components/Preparations';
+import {useWledConnection} from './hooks/useWledConnection';
+import {createRow, generateMapping, importRows, serializeMapping} from './lib/mapping';
 import {
   configureMatrix,
   fetchMapping,
@@ -31,8 +31,8 @@ export function App() {
   const [imported, setImported] = useState(false);
   const [selectedLed, setSelectedLed] = useState(0);
   const [selectedLedEnd, setSelectedLedEnd] = useState<number>();
-  const [rows, setRows] = useState(() => Array.from({ length: 3 }, createRow));
-  const [result, setResult] = useState({ mapping: '', width: 0, height: 0 });
+  const [rows, setRows] = useState(() => Array.from({length: 3}, createRow));
+  const [result, setResult] = useState({mapping: '', width: 0, height: 0});
   const device = useWledConnection();
   const connecting = importing || device.connecting;
 
@@ -42,7 +42,11 @@ export function App() {
       const existing = await fetchMapping(ip);
       if (existing) {
         setRows(importRows(existing));
-        setResult((current) => ({ ...current, width: existing.width, height: existing.height }));
+        setResult((current) => ({
+          ...current,
+          width: existing.width,
+          height: existing.height,
+        }));
       }
       setImported(Boolean(existing));
     } catch {
@@ -60,7 +64,11 @@ export function App() {
       alert('Please fill in all the values in the table!');
       return;
     }
-    setResult({ mapping: serializeMapping(matrix), width: matrix.width, height: matrix.height });
+    setResult({
+      mapping: serializeMapping(matrix),
+      width: matrix.width,
+      height: matrix.height,
+    });
   }
 
   function highlightLED(start: number, end?: number) {
@@ -82,12 +90,7 @@ export function App() {
         >
           <div>WLED IP:</div>
           <div>
-            <Input
-              type="text"
-              aria-label="WLED IP"
-              value={ip}
-              onChange={(event) => setIp(event.target.value)}
-            />
+            <Input type="text" aria-label="WLED IP" value={ip} onChange={(event) => setIp(event.target.value)} />
           </div>
           <div>
             <Button type="submit" disabled={connecting}>

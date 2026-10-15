@@ -1,6 +1,6 @@
-import type { ComponentProps } from 'react';
+import type {ComponentProps} from 'react';
 
-export function Button({ className = '', ...props }: ComponentProps<'button'>) {
+export function Button({className = '', ...props}: ComponentProps<'button'>) {
   return (
     <button
       {...props}

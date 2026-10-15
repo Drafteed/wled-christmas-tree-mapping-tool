@@ -1,7 +1,7 @@
-import type { Dispatch, SetStateAction } from 'react';
-import { Button } from './Button';
-import { Input } from './Input';
-import { createRow, type MappingRowValues } from '../lib/mapping';
+import type {Dispatch, SetStateAction} from 'react';
+import {createRow, type MappingRowValues} from '../lib/mapping';
+import {Button} from './Button';
+import {Input} from './Input';
 
 interface Props {
   rows: MappingRowValues[];
@@ -28,9 +28,7 @@ export function MappingEditor({
 }: Props) {
   function updateRow(index: number, field: keyof MappingRowValues, value: string) {
     setRows((current) =>
-      current.map((row, i) =>
-        i === index ? { ...row, [field]: value === '' ? '' : parseInt(value, 10) } : row,
-      ),
+      current.map((row, i) => (i === index ? {...row, [field]: value === '' ? '' : parseInt(value, 10)} : row)),
     );
   }
 
@@ -49,15 +47,16 @@ export function MappingEditor({
       </div>
       <div className="my-4 max-w-3xl space-y-4">
         <p>
-          🎄 Add one row for each horizontal row on your tree, from bottom to top: <b>Row 1 is the lowest</b>.
-          For each row, enter the <b>leftmost</b> and <b>rightmost</b> LED numbers as viewed from the front.
+          🎄 Add one row for each horizontal row on your tree, from bottom to top: <b>Row 1 is the lowest</b>. For each
+          row, enter the <b>leftmost</b> and <b>rightmost</b> LED numbers as viewed from the front.
         </p>
         <p>
-          🔎 Use the slider to locate individual LEDs.<br/>
-          ✅ Click <b>Highlight</b> to check an entire row.<br/>
-          ⚠️ Start with <b>Offset</b> at 0.<br/>
-          ℹ️ Use <b>Highlight center LEDs</b> and adjust each row's offset
-          to align the centers vertically.
+          🔎 Use the slider to locate individual LEDs.
+          <br />✅ Click <b>Highlight</b> to check an entire row.
+          <br />
+          ⚠️ Start with <b>Offset</b> at 0.
+          <br />
+          ℹ️ Use <b>Highlight center LEDs</b> and adjust each row's offset to align the centers vertically.
         </p>
       </div>
 
@@ -69,9 +68,7 @@ export function MappingEditor({
             {selectedLedEnd && ` - ${selectedLedEnd}`}
           </div>
         ) : (
-          <div className="my-2.5 text-red-600">
-            WLED disconnected. Reconnecting...
-          </div>
+          <div className="my-2.5 text-red-600">WLED disconnected. Reconnecting...</div>
         )}
 
         <input
@@ -80,7 +77,7 @@ export function MappingEditor({
           max={count - 1}
           disabled={!connected}
           value={selectedLed}
-          onChange={(e) => highlightLED(parseInt(e.target.value))}
+          onChange={(e) => highlightLED(parseInt(e.target.value, 10))}
           className="w-full"
         />
       </div>
@@ -99,6 +96,7 @@ export function MappingEditor({
           <tbody>
             {rows
               .map((row, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: Rows are positional and all inputs are controlled; there is no row-local state.
                 <tr key={i}>
                   <td>Row {i + 1}</td>
                   {(['left', 'right', 'offset'] as const).map((field) => (
@@ -121,9 +119,7 @@ export function MappingEditor({
                         </Button>
                       </div>
                       <div>
-                        <Button
-                          onClick={() => setRows((current) => current.filter((_, index) => index !== i))}
-                        >
+                        <Button onClick={() => setRows((current) => current.filter((_, index) => index !== i))}>
                           Delete
                         </Button>
                       </div>
@@ -138,14 +134,10 @@ export function MappingEditor({
       <div className="mt-5">
         <div className="grid gap-2.5 md:flex md:flex-wrap md:items-center">
           <div>
-            <Button onClick={generateMapping}>
-              Generate mapping
-            </Button>
+            <Button onClick={generateMapping}>Generate mapping</Button>
           </div>
           <div>
-            <Button onClick={() => setRows((current) => [...current, createRow()])}>
-              Add row
-            </Button>
+            <Button onClick={() => setRows((current) => [...current, createRow()])}>Add row</Button>
           </div>
           <div>
             <Button disabled={!connected} onClick={highlightCenterLEDs}>
