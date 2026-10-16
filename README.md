@@ -38,18 +38,23 @@ the strip works. Back up and remove any `/ledmap.json`, `/ledmapX.json` and
 To adjust an existing mapping created with this tool, keep `/ledmap.json` - it
 will be imported automatically when you connect.
 
-## Create mapping
+## Usage
 
-Open the [online tool](https://drafteed.github.io/wled-christmas-tree-mapping-tool/)
-in Chrome or Edge on a computer, or Chrome on Android (version 147+).
+[Open the online tool](https://drafteed.github.io/wled-christmas-tree-mapping-tool/).
+
+The online tool requires a browser that supports connecting from a website to devices on your
+local network, using a local IP address or `.local` hostname. 
+Use Chrome or Edge on a computer, or Chrome on Android (version 147+). 
 Allow local network access when prompted.
-Your computer or phone must be on the same network as WLED.
+**Safari/Firefox are currently not supported.**
 
 Alternatively, download **WLED_CHRISTMAS_TREE_MAPPING_TOOL.html** from the
-[latest release](https://github.com/Drafteed/wled-christmas-tree-mapping-tool/releases/latest)
-and open it locally. The file works without internet access or installation.
+[latest release](https://github.com/Drafteed/wled-christmas-tree-mapping-tool/releases/latest) and open it locally **in any modern browser**. 
+The file works without internet access or installation.
 
 Enter your WLED IP address or `.local` hostname and follow the guided steps.
+
+Your computer or phone must be on the same network as WLED.
 
 <a href="/images/ui.png"><img src="/images/ui.png" width="700" alt="WLED Christmas Tree Lights Mapping Tool UI"></a>
 
