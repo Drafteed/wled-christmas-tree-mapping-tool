@@ -1,6 +1,6 @@
 # WLED Christmas Tree Lights Mapping Tool
 
-<img src="https://img.shields.io/badge/React-%23505050.svg?logo=react" alt="React"> <a href="LICENSE"><img src="https://img.shields.io/github/license/Drafteed/wled-christmas-tree-mapping-tool?color=orange" alt="Licence"></a>
+<img src="https://img.shields.io/badge/React-%23505050.svg?logo=react" alt="React"> <a href="LICENSE"><img src="https://img.shields.io/github/license/Drafteed/wled-christmas-tree-mapping-tool?color=orange" alt="License"></a>
 
 Simple and easy-to-use tool for creating [WLED](https://kno.wled.ge/) mappings for Christmas tree lights.
 It guides you through a few simple steps to generate a 2D matrix mapping for addressable LEDs,
@@ -40,21 +40,19 @@ will be imported automatically when you connect.
 
 ## Usage
 
-[Open the online tool](https://drafteed.github.io/wled-christmas-tree-mapping-tool/).
+Ensure your computer or phone is connected to the same local network as your WLED device.
 
-The online tool requires a browser that supports connecting from a website to devices on your
-local network, using a local IP address or `.local` hostname. 
-Use Chrome or Edge on a computer, or Chrome on Android (version 147+). 
-Allow local network access when prompted.
-**Safari/Firefox are currently not supported.**
+### Option 1: Offline Version (works in any browser)
+1. Download **`WLED_CHRISTMAS_TREE_MAPPING_TOOL.html`** from the [latest release](https://github.com/Drafteed/wled-christmas-tree-mapping-tool/releases/latest).
+2. Open the downloaded file locally in **any modern browser** (no internet access or installation required).
+3. Enter your WLED IP address or `.local` hostname and follow the on-screen instructions.
 
-Alternatively, download **WLED_CHRISTMAS_TREE_MAPPING_TOOL.html** from the
-[latest release](https://github.com/Drafteed/wled-christmas-tree-mapping-tool/releases/latest) and open it locally **in any modern browser**. 
-The file works without internet access or installation.
+### Option 2: Online Web Tool
+1. [Open the online tool](https://drafteed.github.io/wled-christmas-tree-mapping-tool/) in **Chrome or Edge** (desktop) or **Chrome 147+ on Android**.
+2. Enter your WLED IP address or `.local` hostname.
+3. Grant local network access when prompted by your browser and follow the guided steps.
 
-Enter your WLED IP address or `.local` hostname and follow the guided steps.
-
-Your computer or phone must be on the same network as WLED.
+> **Note:** The online version requires a browser that allows websites to connect to local network devices. **Safari and Firefox currently are not supported** for the online tool - use the offline HTML file instead.
 
 <a href="/images/ui.png"><img src="/images/ui.png" width="700" alt="WLED Christmas Tree Lights Mapping Tool UI"></a>
 
@@ -68,10 +66,10 @@ Your computer or phone must be on the same network as WLED.
 
 ## Troubleshooting
 
-- **Cannot connect?** Check that WLED opens in your browser and both devices are
-  on the same network. Try its IP address instead of a `.local` hostname.
-- **Online tool blocked?** Allow local network access in your browser. If it
+- **Online tool could not connect?** Allow local network access in your browser. If it
   still fails, try opening the downloaded HTML file locally.
+- **Still cannot connect?** Check that WLED opens in your browser and both devices are
+  on the same network. Try its IP address instead of a `.local` hostname.
 - **Mapping not applied?** Upload the mapping, configure the 2D matrix and fully
   reboot WLED before testing effects.
 
